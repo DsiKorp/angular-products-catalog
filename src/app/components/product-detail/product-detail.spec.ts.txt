@@ -1,0 +1,118 @@
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ProductDetail } from './product-detail';
+import { ProductService } from '../../services/ProductService';
+import { CartService } from '../../services/CartService';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
+import { ProductMapped } from '../../models/products.model';
+import { signal } from '@angular/core';
+import { vi } from 'vitest';
+
+describe('ProductDetail', () => {
+  let component: ProductDetail;
+  let fixture: ComponentFixture<ProductDetail>;
+  let mockProductService: any;
+  let mockCartService: any;
+
+  const mockProduct: ProductMapped = {
+    id: 1,
+    title: 'Test Product',
+    price: 25.99,
+    category: 'beauty' as any,
+    stock: 10,
+    rating: 4.5,
+    images: ['img1.jpg', 'img2.jpg'],
+    description: 'This is a test product',
+    dimensions: { width: 15, height: 13, depth: 22 },
+    reviews: [
+      {
+        rating: 5,
+        comment: 'Great product!',
+        date: new Date('2025-01-01'),
+        reviewerName: 'John Doe',
+        reviewerEmail: 'john@example.com'
+      }
+    ]
+  };
+
+  beforeEach(async () => {
+    mockProductService = {
+      getProductById: vi.fn().mockReturnValue(of(mockProduct))
+    };
+    mockCartService = {
+      addToCart: vi.fn(),
+      cartItems: signal([])
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [ProductDetail],
+      providers: [
+        { provide: ProductService, useValue: mockProductService },
+        { provide: CartService, useValue: mockCartService },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            params: of({ id: '1' })
+          }
+        }
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ProductDetail);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('debería ser creado', () => {
+    expect(component).toBeTruthy();
+  });
+
+
+
+  it('debería agregar producto al carrito cuando hay stock', fakeAsync(() => {
+    component.ngOnInit();
+    tick(100);
+    component.addToCart();
+
+    expect(mockCartService.addToCart).toHaveBeenCalledWith(mockProduct, 1);
+  }));
+
+  it('no debería agregar producto al carrito si no hay stock', fakeAsync(() => {
+    component.ngOnInit();
+    tick(100);
+    component.product.set({ ...mockProduct, stock: 0 });
+    component.addToCart();
+
+    expect(mockCartService.addToCart).not.toHaveBeenCalled();
+  }));
+
+  it('no debería agregar producto si el producto no está cargado', () => {
+    component.product.set(null);
+    component.addToCart();
+
+    expect(mockCartService.addToCart).not.toHaveBeenCalled();
+  });
+
+  it('debería mostrar reseñas del producto', fakeAsync(() => {
+    component.ngOnInit();
+    tick(100);
+
+    expect(component.product()?.reviews.length).toBe(1);
+    expect(component.product()?.reviews[0].comment).toBe('Great product!');
+  }));
+
+  it('debería mostrar dimensiones del producto', fakeAsync(() => {
+    component.ngOnInit();
+    tick(100);
+
+    expect(component.product()?.dimensions).toBeDefined();
+    expect(component.product()?.dimensions.width).toBe(15);
+    expect(component.product()?.dimensions.height).toBe(13);
+    expect(component.product()?.dimensions.depth).toBe(22);
+  }));
+
+  it('debería inicializar producto como null', () => {
+    const newComponent = new ProductDetail();
+    expect(newComponent.product()).toBeNull();
+  });
+});

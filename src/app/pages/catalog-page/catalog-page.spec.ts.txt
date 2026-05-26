@@ -1,0 +1,88 @@
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { CatalogPage } from './catalog-page';
+import { ProductService } from '../../services/ProductService';
+import { of, throwError } from 'rxjs';
+import { ProductMapped, ProductsMapped } from '../../models/products.model';
+import { vi } from 'vitest';
+
+describe('CatalogPage', () => {
+  let component: CatalogPage;
+  let fixture: ComponentFixture<CatalogPage>;
+  let mockProductService: any;
+
+  const mockProducts: ProductMapped[] = [
+    {
+      id: 1,
+      title: 'Product 1',
+      price: 50.0,
+      category: 'beauty' as any,
+      stock: 5,
+      rating: 4.5,
+      images: ['img1.jpg'],
+      description: 'Product 1 description',
+      dimensions: { width: 10, height: 10, depth: 10 },
+      reviews: []
+    },
+    {
+      id: 2,
+      title: 'Product 2',
+      price: 25.0,
+      category: 'beauty' as any,
+      stock: 10,
+      rating: 3.5,
+      images: ['img2.jpg'],
+      description: 'Product 2 description',
+      dimensions: { width: 10, height: 10, depth: 10 },
+      reviews: []
+    }
+  ];
+
+  const mockProductsMapped: ProductsMapped = {
+    productsMapped: mockProducts,
+    total: 2
+  };
+
+  beforeEach(async () => {
+    mockProductService = {
+      getProducts: vi.fn().mockReturnValue(of(mockProductsMapped))
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [CatalogPage],
+      providers: [{ provide: ProductService, useValue: mockProductService }]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CatalogPage);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('debería ser creado', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('debería limpiar error cuando se reintenta', () => {
+    // Simular un error previo
+    component.error.set('Some error');
+
+    component.retryLoading();
+
+    expect(component.error()).toBeNull();
+  });
+
+  it('debería inicializar productos como array vacío', () => {
+    const newComponent = new CatalogPage();
+    expect(newComponent.products()).toEqual([]);
+  });
+
+  it('debería inicializar isLoading como true', () => {
+    const newComponent = new CatalogPage();
+    expect(newComponent.isLoading()).toBe(true);
+  });
+
+  it('debería inicializar error como null', () => {
+    const newComponent = new CatalogPage();
+    expect(newComponent.error()).toBeNull();
+  });
+
+});

@@ -1,0 +1,102 @@
+<div *ngIf="product(); else loading" class="py-8">
+  <div class="breadcrumbs text-sm mb-6">
+    <ul>
+      <li><a routerLink="/catalog">Catalog</a></li>
+      <li>{{ product()?.title }}</li>
+    </ul>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Images -->
+    <div>
+      <app-image-carousel [images]="product()!.images" />
+    </div>
+
+    <!-- Product Info -->
+    <div class="space-y-6">
+      <div>
+        <h1 class="text-4xl font-bold">{{ product()?.title }}</h1>
+        <p class="text-gray-600 mt-2">{{ product()?.category }}</p>
+      </div>
+
+      <!-- Rating -->
+      <div class="flex items-center gap-4">
+        <div class="badge badge-lg badge-secondary">
+          {{ product()?.rating }}⭐ Rating
+        </div>
+      </div>
+
+      <!-- Price and Stock -->
+      <div class="divider"></div>
+      <div class="space-y-2">
+        <p class="text-4xl font-bold text-primary">${{ product()!.price.toFixed(2) }}</p>
+        <p class="text-lg" [class]="(product()!.stock || 0) > 0 ? 'text-success' : 'text-error'">
+          {{ (product()!.stock || 0) > 0 ? 'In Stock (' + product()!.stock + ')' : 'Out of Stock' }}
+        </p>
+      </div>
+
+      <!-- Description -->
+      <div class="divider"></div>
+      <div>
+        <h2 class="text-xl font-bold mb-2">Description</h2>
+        <p class="text-gray-700">{{ product()?.description }}</p>
+      </div>
+
+      <!-- Dimensions -->
+      <div *ngIf="product()?.dimensions">
+        <h2 class="text-xl font-bold mb-2">Dimensions</h2>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Width: {{ product()!.dimensions.width }}</li>
+          <li>Height: {{ product()!.dimensions.height }}</li>
+          <li>Depth: {{ product()!.dimensions.depth }}</li>
+        </ul>
+      </div>
+
+      <!-- Add to Cart -->
+      <div class="divider"></div>
+      <div class="flex gap-4">
+        <button
+          (click)="addToCart()"
+          [disabled]="(product()?.stock || 0) === 0"
+          class="btn btn-primary btn-lg flex-1"
+        >
+          Add to Cart
+        </button>
+        <button routerLink="/catalog" class="btn btn-outline btn-lg">
+          Back to Catalog
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews -->
+  <div class="mt-12">
+    <h2 class="text-3xl font-bold mb-6">Customer Reviews</h2>
+    <div class="space-y-4">
+      <div *ngIf="product()?.reviews && product()!.reviews.length > 0; else noReviews">
+        <div *ngFor="let review of product()?.reviews" class="card bg-base-100 shadow">
+          <div class="card-body">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-bold">{{ review.reviewerName }}</h3>
+                <p class="text-sm text-gray-600">{{ review.reviewerEmail }}</p>
+              </div>
+              <div class="badge badge-primary">{{ review.rating }}⭐</div>
+            </div>
+            <p class="mt-2">{{ review.comment }}</p>
+            <p class="text-xs text-gray-500 mt-2">{{ review.date | date }}</p>
+          </div>
+        </div>
+      </div>
+      <ng-template #noReviews>
+        <p class="text-gray-500">No reviews yet</p>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="flex justify-center items-center h-screen">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+</ng-template>

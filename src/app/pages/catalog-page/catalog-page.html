@@ -1,0 +1,23 @@
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-4xl font-bold mb-2">Product Catalog</h1>
+  <p class="text-gray-600 mb-8">Browse our collection of quality products</p>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="flex justify-center items-center h-96">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error()" class="alert alert-error mb-8">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2m8-8l2 2m0 0l2 2m-2-2l-2-2m2 2l2-2" />
+    </svg>
+    <span>{{ error() }}</span>
+    <button (click)="retryLoading()" class="btn btn-sm">Retry</button>
+  </div>
+
+  <!-- Products Grid -->
+  <div *ngIf="!isLoading() && !error()">
+    <app-product-list [products]="products()" />
+  </div>
+</div>
