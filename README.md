@@ -73,11 +73,12 @@ ng test
 O:
 ```bash
 npm test
-```bash
+
+Coverage: 
 ng test --coverage
 
 Esto lanzará Vitest y abrirá un navegador para ejecutar las pruebas. También puedes ejecutar las pruebas en modo watch:
-```bash
+
 ng test --watch
 ```
 
